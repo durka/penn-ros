@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/haptics/ros/vicon/devel/setup.sh
