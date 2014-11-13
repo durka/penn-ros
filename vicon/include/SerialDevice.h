@@ -47,6 +47,7 @@
 
 #include <fcntl.h>
 #include <termios.h>
+#include <unistd.h>
 
 #include <sys/time.h>
 #include <sys/socket.h>
