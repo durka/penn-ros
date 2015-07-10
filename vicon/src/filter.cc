@@ -9,6 +9,7 @@ using namespace ecl;
 #include <vicon/Targets.h>
 
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <algorithm>
 #include <fstream>
@@ -38,19 +39,23 @@ void update_targets()
     output.open(filename.c_str());
   }
 
-  for (vector<string>::iterator i = targets.begin(); i != targets.end(); ++i)
+  if (output.is_open())
   {
-    for (vector<string>::iterator j = names.begin(); j != names.end(); ++j)
+    output << "Timestamp\t";
+    for (vector<string>::iterator i = targets.begin(); i != targets.end(); ++i)
     {
-      if (j->find(*i) != string::npos)
+      for (vector<string>::iterator j = names.begin(); j != names.end(); ++j)
       {
-        target_names.push_back(*j);
-        target_indices.push_back(distance(names.begin(), j));
-        if (output.is_open()) output << *j << "\t";
+        if (j->find(*i) != string::npos)
+        {
+          target_names.push_back(*j);
+          target_indices.push_back(distance(names.begin(), j));
+          output << *j << "\t";
+        }
       }
     }
+    output << endl;
   }
-  if (output.is_open()) output << endl;
   segfault_preventer.unlock();
 }
 
@@ -78,12 +83,16 @@ void targets_callback(const vicon::Targets::ConstPtr& msg)
 void values_callback(const vicon::Values::ConstPtr& msg)
 {
   segfault_preventer.lock();
-  for (int i = 0; i < target_names.size(); ++i)
+  if (output.is_open())
   {
-    ROS_INFO("%s = %g", target_names[i].c_str(), msg->values[target_indices[i]]);
-    if (output.is_open()) output << msg->values[target_indices[i]] << "\t";
+    output << setprecision(9) << fixed << ((double)msg->header.stamp.sec + msg->header.stamp.nsec/1e9f) << "\t";
+    for (int i = 0; i < target_names.size(); ++i)
+    {
+      //ROS_INFO("%s = %g", target_names[i].c_str(), msg->values[target_indices[i]]);
+      output << msg->values[target_indices[i]] << "\t";
+    }
+    output << endl;
   }
-  if (output.is_open()) output << endl;
   segfault_preventer.unlock();
 }
 
