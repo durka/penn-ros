@@ -32,9 +32,9 @@ void names_callback(const vicon::Names::ConstPtr& msg)
     }
 
     vicon::Targets msg;
-    printf("CSV filename (\"STOP\" to kill)> ");
+    printf("CSV filename (or \"STOP\", \"PAUSE\")> ");
     getline(cin, msg.filename);
-    if (msg.filename != "STOP")
+    if (msg.filename != "STOP" && msg.filename != "PAUSE")
     {
       for (int i = 0; i < categories.size(); ++i)
       {
@@ -51,11 +51,11 @@ void names_callback(const vicon::Names::ConstPtr& msg)
           ROS_ERROR("%d out of range", n);
         } else {
           ROS_INFO("Adding %d=%s", n, categories[n].c_str());
-          msg.names.push_back(categories[n]);
+          msg.targets.push_back(categories[n]);
         }
       }
     }
-    ROS_INFO("Publishing %d targets", msg.names.size());
+    ROS_INFO("Publishing %d targets", msg.targets.size());
     pub_targets.publish(msg);
     ros::shutdown();
   }

@@ -28,7 +28,16 @@ void update_targets()
   target_indices.clear();
   if (output.is_open()) output.close();
 
-  if (filename == "STOP") ros::shutdown();
+  if (filename == "STOP")
+  {
+    ROS_INFO("Shutting down");
+    ros::shutdown();
+  }
+  if (filename == "PAUSE"){
+    ROS_INFO("Stopped recording");
+    segfault_preventer.unlock();
+    return;
+  }
 
   ifstream test_file(filename.c_str());
   if (test_file.good())
@@ -63,7 +72,14 @@ void names_callback(const vicon::Names::ConstPtr& msg)
 {
   if (names.size() == 0 || msg->names != names)
   {
-    ROS_INFO("Names changed!");
+    if (names.size() == 0)
+    {
+      ROS_INFO("Names received!");
+    }
+    else
+    {
+      ROS_INFO("Names changed!");
+    }
     names = msg->names;
     update_targets();
   }
@@ -71,11 +87,22 @@ void names_callback(const vicon::Names::ConstPtr& msg)
 
 void targets_callback(const vicon::Targets::ConstPtr& msg)
 {
-  if (targets.size() == 0 || msg->names != targets)
+  if (targets.size() == 0 || msg->targets != targets || filename != msg->filename)
   {
-    ROS_INFO("Targets changed!");
+    if (targets.size() == 0)
+    {
+      ROS_INFO("Targets received!");
+    }
+    else if (msg->targets != targets)
+    {
+      ROS_INFO("Targets changed!");
+    }
+    else
+    {
+      ROS_INFO("Filename changed!");
+    }
+    targets = msg->targets;
     filename = msg->filename;
-    targets = msg->names;
     update_targets();
   }
 }
