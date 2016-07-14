@@ -1,2 +1,2 @@
 string   filename
-string[] names
+string[] targets
